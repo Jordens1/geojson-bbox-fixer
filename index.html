@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Find GeoJSON bbox mismatches, compare declared and calculated bounds, then fix and download your file locally. No upload or account.">
+  <title>GeoJSON Bbox Mismatch Fixer — Check & Repair Bounds Locally</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./src/app.js"></script>
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Boundsmith home"><span class="brand-mark" aria-hidden="true">⌗</span><span>boundsmith<span class="brand-period">.</span></span></a>
+      <nav aria-label="Page links"><a href="#workflow">How it works</a><a href="#scope">Scope & privacy</a><a href="https://www.rfc-editor.org/rfc/rfc7946.html#section-5" target="_blank" rel="noopener noreferrer">RFC 7946 ↗</a></nav>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> LOCAL GEOJSON UTILITY <span class="eyebrow-divider">/</span> TOOL 01</div>
+        <h1 id="page-title">The bounds say one thing.<br><span>The coordinates say another.</span></h1>
+        <p>Find every declared <code>bbox</code> that differs from the coordinates it describes. Review the exact change, fix the bounds, and download a clean GeoJSON file.</p>
+        <div class="hero-points"><span>⌁ &nbsp;No upload</span><span>◫ &nbsp;Nested bbox checks</span><span>↗ &nbsp;Dateline aware</span></div>
+      </section>
+      <section class="workspace" id="workflow" aria-label="GeoJSON checker workspace">
+        <div class="panel input-panel">
+          <div class="panel-heading"><div><span class="step-number">01</span><h2>Bring your GeoJSON</h2></div><span class="panel-caption">.geojson / .json · up to 5 MiB</span></div>
+          <div class="input-options"><label class="file-target" id="drop-zone" for="file-input"><span class="upload-icon" aria-hidden="true">↥</span><strong>Drop a file here</strong><span>or click to choose one from your device</span><input id="file-input" type="file" accept=".geojson,.json,application/geo+json,application/json"></label><div class="input-or"><span>OR PASTE BELOW</span></div></div>
+          <label class="field-label" for="geojson-input">GeoJSON source <span id="source-name">Unsaved input</span></label>
+          <textarea id="geojson-input" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Paste a GeoJSON Feature, FeatureCollection, or Geometry here…"></textarea>
+          <div class="input-footer"><button class="text-button" id="sample-button" type="button">Load an example ↗</button><button class="text-button" id="clear-button" type="button">Clear input</button><span id="input-size">0 B</span></div>
+          <button class="primary-button" id="analyze-button" type="button"><span>Inspect bbox values</span><span aria-hidden="true">→</span></button>
+          <p class="input-note">Your coordinates stay in this browser tab. Only the file you choose is read.</p>
+        </div>
+        <div class="panel results-panel">
+          <div class="panel-heading"><div><span class="step-number">02</span><h2>Review the differences</h2></div><span class="panel-caption" id="result-caption">Awaiting input</span></div>
+          <div id="status" class="status" role="status">Paste GeoJSON or load the example to see how this works.</div>
+          <div class="empty-state" id="empty-state" aria-hidden="true"><div class="empty-visual"><div class="empty-box empty-box-one"></div><div class="empty-box empty-box-two"></div><span>?</span></div><strong>A clearer boundary starts here.</strong><p>We’ll compare each declared box with a tight box calculated from its geometry.</p></div>
+          <div id="result-content" hidden>
+            <div class="metrics"><div><span>POSITIONS</span><strong id="position-count">—</strong></div><div><span>BOXES CHECKED</span><strong id="box-count">—</strong></div><div><span>DIFFERENCES</span><strong id="difference-count">—</strong></div></div>
+            <div id="no-bbox-note" class="notice" hidden>The original input has no declared bbox. You can add one to the root object using the calculated coordinate extent.</div>
+            <div id="uncheckable-note" class="notice warning" hidden>One or more declared boxes have no coordinates to check. Automatic repair is disabled to avoid a partial result.</div>
+            <div id="row-list" class="row-list" aria-label="Bbox comparison results"></div>
+            <div id="extent-preview" class="extent-preview" hidden><div class="preview-heading"><span>LONGITUDE EXTENT</span><span id="preview-path"></span></div><div class="axis-labels"><span>−180°</span><span>0°</span><span>+180°</span></div><div class="range-track" id="declared-track"><span class="range-label">DECLARED</span></div><div class="range-track" id="computed-track"><span class="range-label">CALCULATED</span></div><p>Range bands are a longitude guide, not a geographic map.</p></div>
+            <div class="action-stack"><button class="primary-button" id="repair-button" type="button" hidden><span>Fix mismatched bbox values</span><span aria-hidden="true">→</span></button><button class="secondary-button" id="add-root-button" type="button" hidden>Add a root bbox instead</button></div>
+          </div>
+        </div>
+      </section>
+      <section class="output-panel panel" id="output-panel" hidden aria-labelledby="output-title"><div class="panel-heading"><div><span class="step-number">03</span><h2 id="output-title">Your repaired file</h2></div><span class="panel-caption" id="output-caption">Ready to export</span></div><p>Only <code>bbox</code> fields are intentionally updated. JSON formatting is rewritten, and browser number parsing can round unusually precise numeric literals. Compare this preview with your original input.</p><textarea id="output-text" readonly aria-label="Repaired GeoJSON preview"></textarea><div class="output-actions"><button class="primary-button" id="download-button" type="button"><span>Download repaired GeoJSON</span><span aria-hidden="true">↓</span></button><button class="secondary-button" id="copy-button" type="button">Copy JSON</button></div></section>
+      <section class="below-grid" id="scope"><div><span class="section-kicker">THE SHORT VERSION</span><h2>One focused fix.<br>No quiet edits.</h2><p>We inspect <code>bbox</code> members on the root, features and geometries. A box that differs from the tight calculated extent is flagged—even when its larger bounds may still be valid GeoJSON.</p></div><div class="scope-card"><h3>What this checker does</h3><ul><li>Checks 2D and 3D positions in WGS84 longitude / latitude order.</li><li>Handles already-cut geometry on both sides of the antimeridian.</li><li>Changes only existing bbox values, or adds a root bbox when you ask.</li></ul><h3>What it doesn’t do</h3><p>It does not fix coordinates, projection, polygon topology or invalid shapes, and it is not a full GeoJSON validator.</p></div></section>
+    </main>
+    <footer><span>boundsmith. · A local-first utility</span><span>Based on <a href="https://www.rfc-editor.org/rfc/rfc7946.html#section-5" target="_blank" rel="noopener noreferrer">RFC 7946 §5</a> · No account, no upload</span></footer>
+  </div>
+</body>
+</html>
