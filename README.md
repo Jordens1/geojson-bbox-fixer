@@ -19,3 +19,7 @@ Open http://127.0.0.1:8788/. Run npm test for the engine regression suite. Run n
 - Empty/null geometry with a declared bbox cannot be verified, so automatic repair is blocked.
 - Input stays in the current browser tab. The original input is not overwritten; download is a new file.
 - The downloaded JSON is reserialized. Formatting changes, and browser number parsing can round unusually precise numeric literals. Compare the preview with the original when exact lexical representation matters.
+
+## Search indexing
+
+The canonical public URL is https://bboxfixer.com/. The build includes `robots.txt` and a one-page `sitemap.xml` at the site root. Submit `https://bboxfixer.com/sitemap.xml` in Google Search Console after verifying ownership of the domain. The `www` hostname redirects to the canonical host; Pages preview domains remain `noindex`.
