@@ -65,8 +65,8 @@ function invalidate() {
   el('input-size').textContent = formatBytes(new Blob([input.value]).size);
 }
 
-function formatBox(value) {
-  if (value === null) return 'No coordinates to calculate';
+function formatBox(value, calculated = false) {
+  if (value === null) return calculated ? 'No coordinates to calculate' : 'Invalid bbox (expected a numeric array)';
   if (value === undefined) return 'Not declared';
   if (!Array.isArray(value)) return 'Invalid bbox (expected a numeric array)';
   const display = value.slice(0, 8).map((entry) => Number.isFinite(entry) ? String(entry) : '[non-number]');
@@ -100,6 +100,26 @@ function showPreview(row) {
   paintTrack(el('computed-track'), row.computed, 'computed');
 }
 
+function explanation(row) {
+  if (row.status === 'uncheckable') return 'No coordinate extent is available. This bbox cannot be checked or repaired automatically.';
+  if (row.status !== 'different') return '';
+  if (row.reason === 'outside') return 'Data outside declared bbox: some coordinates fall outside the stated extent.';
+  if (row.reason === 'broader') return 'Declared bbox covers data but is not tight. A wider bbox can still be valid GeoJSON.';
+  if (row.reason === 'malformed') return 'Declared bbox has unusable shape/values. The calculated value can replace it.';
+  return 'Different from calculated tight bbox. Coverage cannot be classified safely for this extent.';
+}
+
+async function copyCalculated(row, button, feedback) {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(row.computed));
+    button.textContent = 'Copied calculated bbox';
+    feedback.textContent = 'Calculated bbox copied for ' + row.path + '.';
+    window.setTimeout(() => { button.textContent = 'Copy calculated bbox'; }, 1800);
+  } catch {
+    feedback.textContent = 'Clipboard unavailable. Select and copy this value manually: ' + JSON.stringify(row.computed);
+  }
+}
+
 function renderRow(row) {
   const item = makeNode('article', 'result-row ' + row.status);
   const top = makeNode('div', 'result-row-top');
@@ -110,14 +130,26 @@ function renderRow(row) {
   const declared = makeNode('div', 'comparison-value');
   declared.append(makeNode('span', '', 'DECLARED'), makeNode('code', '', formatBox(row.declared)));
   const computed = makeNode('div', 'comparison-value');
-  computed.append(makeNode('span', '', 'CALCULATED'), makeNode('code', '', formatBox(row.computed)));
+  const axisOrder = row.computed?.length === 6 ? 'W, S, MIN Z, E, N, MAX Z' : 'W, S, E, N';
+  computed.append(makeNode('span', '', row.computed ? 'CALCULATED · ' + axisOrder : 'CALCULATED'), makeNode('code', '', formatBox(row.computed, true)));
   comparison.append(declared, computed);
   item.append(comparison);
+  const detail = explanation(row);
+  if (detail) item.append(makeNode('p', 'result-explanation', detail));
   if (row.computed) {
+    const actions = makeNode('div', 'row-actions');
+    const copy = makeNode('button', 'row-copy', 'Copy calculated bbox');
+    copy.type = 'button';
+    copy.setAttribute('aria-label', 'Copy calculated bbox for ' + row.path);
+    const feedback = makeNode('span', 'copy-feedback');
+    feedback.setAttribute('role', 'status');
+    copy.addEventListener('click', () => copyCalculated(row, copy, feedback));
+    actions.append(copy);
     const inspect = makeNode('button', 'row-inspect', 'View longitude extent ↗');
     inspect.type = 'button';
     inspect.addEventListener('click', () => showPreview(row));
-    item.append(inspect);
+    actions.append(inspect);
+    item.append(actions, feedback);
   }
   return item;
 }

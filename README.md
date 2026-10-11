@@ -1,6 +1,6 @@
 # GeoJSON Bbox Mismatch Fixer
 
-Standalone static site for comparing declared GeoJSON bbox values with coordinate-derived tight bounds, replacing differing values, and downloading a repaired file. No dependencies, account, API, upload or telemetry.
+Standalone static site for comparing declared GeoJSON bbox values with coordinate-derived tight bounds, explaining each difference, copying a calculated bbox, replacing differing values, and downloading a repaired file. No dependencies, account, API, upload or telemetry.
 
 ## Run locally
 
@@ -15,6 +15,8 @@ Open http://127.0.0.1:8788/. Run npm test for the engine regression suite. Run n
 - Maximum input: 5 MiB; maximum 200,000 positions and 64 nested JSON levels.
 - Checks bbox members on GeoJSON objects. Other objects such as properties are preserved and not treated as GeoJSON.
 - A difference from the **tight** calculated box is not necessarily an RFC violation. A broader declared bbox may be intentional.
+- Difference explanations distinguish coordinates outside the declared bbox, broader boxes, and unusable bbox values. Wrapped antimeridian cases use neutral wording when containment is uncertain.
+- Each calculated bbox can be copied as a compact JSON array in longitude, latitude, then optional elevation order. A manual copy value appears when clipboard access fails.
 - The tool does not repair coordinates, antimeridian crossing geometry, projection, polygon topology or general GeoJSON validity.
 - Empty/null geometry with a declared bbox cannot be verified, so automatic repair is blocked.
 - Input stays in the current browser tab. The original input is not overwritten; download is a new file.

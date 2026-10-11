@@ -12,7 +12,7 @@ self.onmessage = ({ data }) => {
       self.postMessage({
         id,
         action: 'analyzed',
-        rows: current.rows.map(({ path, declared, computed, status }) => ({ path, declared, computed, status })),
+        rows: current.rows.map(({ path, declared, computed, status, reason }) => ({ path, declared, computed, status, reason })),
         rootBox: current.rootBox,
         rootMissing: current.rootMissing,
         positions: current.positions,

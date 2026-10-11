@@ -14,6 +14,7 @@ test('finds a mismatch and changes only bbox data', () => {
   const result = check(input);
   assert.equal(result.differences, 1);
   assert.deepEqual(result.rows[0].computed, [2, 3, 2, 3]);
+  assert.equal(result.rows[0].reason, 'outside');
   const fixed = repairAnalysis(result);
   assert.deepEqual(fixed.document.bbox, [2, 3, 2, 3]);
   assert.deepEqual(fixed.document.properties, input.properties);
@@ -40,6 +41,7 @@ test('inspects root, feature and geometry boxes separately', () => {
   assert.equal(result.rows.length, 3);
   assert.equal(result.differences, 2);
   assert.deepEqual(result.rows.map((row) => row.path), ['$.features[0].geometry', '$.features[0]', '$']);
+  assert.deepEqual(result.rows.map((row) => row.reason), ['outside', null, 'outside']);
   const fixed = repairAnalysis(result);
   assert.equal(fixed.changed, 2);
   assert.deepEqual(fixed.document.features[0].bbox, [2, 2, 3, 3]);
@@ -61,6 +63,7 @@ test('can add a missing root bbox without adding child boxes', () => {
 test('calculates a 3D bbox with elevation in axis order', () => {
   const result = check({ type: 'MultiPoint', bbox: [0, 0, 0, 1, 1, 1], coordinates: [[2, 3, 9], [4, 8, -5]] });
   assert.deepEqual(result.rootBox, [2, 3, -5, 4, 8, 9]);
+  assert.equal(result.rows[0].reason, 'outside');
   assert.deepEqual(repairAnalysis(result).document.bbox, [2, 3, -5, 4, 8, 9]);
 });
 
@@ -81,12 +84,41 @@ test('does not turn an uncut long line into a short crossing bbox', () => {
   const result = check({ type: 'LineString', bbox: [100, 0, -100, 0], coordinates: [[-100, 0], [100, 0]] });
   assert.deepEqual(result.rootBox, [-100, 0, 100, 0]);
   assert.equal(result.differences, 1);
+  assert.equal(result.rows[0].reason, 'uncertain');
 });
 
 test('allows a larger box but describes it as a difference', () => {
   const result = check({ type: 'Point', bbox: [-10, -10, 10, 10], coordinates: [0, 0] });
   assert.equal(result.rows[0].status, 'different');
+  assert.equal(result.rows[0].reason, 'broader');
   assert.deepEqual(result.rootBox, [0, 0, 0, 0]);
+});
+
+test('classifies malformed bbox values and keeps a calculated value available', () => {
+  for (const bbox of [[0, 0, 1], [0, 'south', 1, 1], null, [0, 95, 1, 96], [0, 5, 1, 4]]) {
+    const result = check({ type: 'Point', bbox, coordinates: [0, 0] });
+    assert.equal(result.rows[0].reason, 'malformed');
+    assert.deepEqual(result.rows[0].computed, [0, 0, 0, 0]);
+    assert.deepEqual(repairAnalysis(result).document.bbox, [0, 0, 0, 0]);
+  }
+});
+
+test('classifies a wider 3D bbox separately from an elevation that excludes data', () => {
+  const broad = check({ type: 'Point', bbox: [-1, -1, -10, 1, 1, 10], coordinates: [0, 0, 5] });
+  const tooLow = check({ type: 'Point', bbox: [-1, -1, 0, 1, 1, 4], coordinates: [0, 0, 5] });
+  assert.deepEqual(broad.rows[0].computed, [0, 0, 5, 0, 0, 5]);
+  assert.equal(broad.rows[0].reason, 'broader');
+  assert.equal(tooLow.rows[0].reason, 'outside');
+});
+
+test('uses neutral classification when antimeridian coverage is ambiguous', () => {
+  const result = check({
+    type: 'MultiLineString',
+    bbox: [176, -21, -177, -15],
+    coordinates: [[[177, -20], [180, -18]], [[-180, -18], [-178, -16]]],
+  });
+  assert.deepEqual(result.rows[0].computed, [177, -20, -178, -16]);
+  assert.equal(result.rows[0].reason, 'uncertain');
 });
 
 test('accepts a tiny numeric rounding difference', () => {
@@ -97,6 +129,7 @@ test('accepts a tiny numeric rounding difference', () => {
 test('null geometry with a declared bbox blocks all automatic repair', () => {
   const result = check({ type: 'Feature', bbox: [0, 0, 1, 1], properties: {}, geometry: null });
   assert.equal(result.uncheckable, 1);
+  assert.equal(result.rows[0].reason, null);
   assert.equal(result.canRepair, false);
   assert.throws(() => repairAnalysis(result), /blocked/);
 });

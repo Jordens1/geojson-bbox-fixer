@@ -193,6 +193,30 @@ function matches(declared, calculated) {
     && declared.every((value, index) => typeof value === 'number' && Number.isFinite(value) && Math.abs(value - calculated[index]) <= EPSILON);
 }
 
+function differenceKind(declared, calculated) {
+  if (!Array.isArray(declared) || declared.length !== calculated.length
+    || !declared.every((value) => typeof value === 'number' && Number.isFinite(value))) return 'malformed';
+  const half = declared.length / 2;
+  const [west, south] = declared;
+  const east = declared[half];
+  const north = declared[half + 1];
+  if (west < -180 || west > 180 || east < -180 || east > 180
+    || south < -90 || south > 90 || north < -90 || north > 90 || south > north
+    || (half === 3 && declared[2] > declared[5])) return 'malformed';
+
+  // Wrapped longitude ranges and the equivalent -180/180 endpoints need a
+  // separate geographic containment proof. Keep their wording neutral.
+  if (west > east || calculated[0] > calculated[half]
+    || [west, east, calculated[0], calculated[half]].some((value) => Math.abs(value) === 180)) return 'uncertain';
+
+  const covers = west <= calculated[0] + EPSILON
+    && east >= calculated[half] - EPSILON
+    && south <= calculated[1] + EPSILON
+    && north >= calculated[half + 1] - EPSILON
+    && (half === 2 || (declared[2] <= calculated[2] + EPSILON && declared[5] >= calculated[5] - EPSILON));
+  return covers ? 'broader' : 'outside';
+}
+
 export function analyzeText(text) {
   if (typeof text !== 'string') fail('Paste GeoJSON or choose a file first.', '$');
   if (new TextEncoder().encode(text).length > MAX_INPUT_BYTES) fail('Input exceeds the 5 MiB limit.', '$');
@@ -230,8 +254,9 @@ export function analyzeText(text) {
     if (own(node, 'bbox')) {
       const computed = calculatedBox(coverage, state.dimensions);
       const status = computed === null ? 'uncheckable' : matches(node.bbox, computed) ? 'match' : 'different';
+      const reason = status === 'different' ? differenceKind(node.bbox, computed) : null;
       if (status === 'uncheckable') state.uncheckable++;
-      state.rows.push({ path, parts, declared: node.bbox, computed, status });
+      state.rows.push({ path, parts, declared: node.bbox, computed, status, reason });
     }
     return coverage;
   };

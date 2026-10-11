@@ -84,6 +84,8 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 .metrics strong { display: block; margin-top: 5px; font-size: 23px; font-weight: 750; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
 .notice { padding: 11px 13px; margin: 13px 0; border-left: 3px solid #13936b; background: #edf8f1; color: #386854; font-size: 12px; line-height: 1.5; }
 .notice.warning { border-color: #d59542; background: #fff6e9; color: #7d592e; }
+.comparison-note { margin: 13px 0; color: #66786b; font-size: 11px; line-height: 1.6; }
+.comparison-note a { color: #147d5d; }
 .row-list { max-height: 390px; overflow: auto; padding-right: 3px; }
 .result-row { padding: 15px 14px; border: 1px solid #e2ebe3; border-radius: 10px; margin-bottom: 9px; }
 .result-row.different { border-color: #e9d9bf; background: #fffcf7; }
@@ -97,8 +99,14 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 .comparison-value { min-width: 0; }
 .comparison-value span { display: block; margin-bottom: 4px; color: #92a096; font-size: 9px; font-weight: 800; letter-spacing: .09em; }
 .comparison-value code { display: block; color: #31483c; line-height: 1.5; overflow-wrap: anywhere; font-size: 11px; }
-.row-inspect { margin-top: 11px; padding: 0; border: 0; background: none; color: #138563; font-size: 11px; font-weight: 700; }
+.result-explanation { margin: 11px 0 0; color: #5e6e60; font-size: 11px; line-height: 1.5; }
+.row-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 12px; }
+.row-copy { min-height: 34px; padding: 6px 10px; border: 1px solid #b9d9c7; border-radius: 6px; background: #f2faf5; color: #116c4f; font-size: 11px; font-weight: 750; cursor: pointer; }
+.row-copy:hover { background: #e6f5eb; }
+.row-inspect { min-height: 34px; padding: 0; border: 0; background: none; color: #138563; font-size: 11px; font-weight: 700; cursor: pointer; }
 .row-inspect:hover { text-decoration: underline; }
+.copy-feedback { display: block; margin-top: 7px; color: #356650; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; user-select: text; }
+.copy-feedback:empty { display: none; }
 .no-rows { color: #6b8072; font-size: 12px; }
 .extent-preview { margin: 16px 0; padding: 15px 13px; border: 1px solid #e1ebe3; background: #f9fcf9; border-radius: 10px; }
 .preview-heading, .axis-labels { display: flex; justify-content: space-between; gap: 10px; color: #88a091; font-size: 9px; font-weight: 800; letter-spacing: .08em; }
