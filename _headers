@@ -3,6 +3,12 @@
   Referrer-Policy: no-referrer
   Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'; connect-src 'none'; img-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'
 
+/
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache
+
 https://:project.pages.dev/*
   X-Robots-Tag: noindex
 

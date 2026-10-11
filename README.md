@@ -8,7 +8,7 @@ Node.js 20+:
 
     npm start
 
-Open http://127.0.0.1:8788/. Run npm test for the engine regression suite. Run npm run build to create the deployable dist/ directory. Deploy dist/ to Cloudflare Pages; a Node process is not required in production. The generated `_headers` file applies the local preview's CSP and other security headers. It limits `noindex` to Pages-hosted preview URLs so a custom domain can be indexed.
+Open http://127.0.0.1:8788/. Run npm test for the engine regression suite. Run npm run build to create the deployable dist/ directory. Deploy dist/ to Cloudflare Pages; a Node process is not required in production. The build fingerprints CSS and JavaScript URLs so returning visitors load matching assets after a release. The generated `_headers` file applies the local preview's CSP and other security headers, asks browsers to revalidate HTML, and limits `noindex` to Pages-hosted preview URLs so a custom domain can be indexed.
 
 ## Boundaries
 
