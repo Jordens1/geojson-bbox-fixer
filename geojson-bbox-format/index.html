@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GeoJSON Bbox Format and Coordinate Order | Boundsmith</title>
+  <meta name="description" content="Read a GeoJSON bbox in west, south, east, north order. Worked examples show how to calculate 2D bounds, include elevation, and handle the antimeridian.">
+  <link rel="canonical" href="https://bboxfixer.com/geojson-bbox-format/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Boundsmith">
+  <meta property="og:title" content="GeoJSON Bbox Format and Coordinate Order">
+  <meta property="og:description" content="Read and calculate a bounding box from 2D points, positions with elevation, or points on either side of the dateline.">
+  <meta property="og:url" content="https://bboxfixer.com/geojson-bbox-format/">
+  <meta property="og:image" content="https://bboxfixer.com/bbox-example.png">
+  <meta property="og:image:alt" content="A worked example comparing declared bounds with bounds calculated from a polygon.">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.png" type="image/png" sizes="96x96">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Boundsmith home"><span class="brand-mark" aria-hidden="true">⌗</span><span>boundsmith<span class="brand-period">.</span></span></a>
+      <nav aria-label="Main navigation"><a href="/#workflow">Open checker</a></nav>
+    </header>
+    <main class="guide">
+      <h1>GeoJSON bbox format and coordinate order</h1>
+      <p>A two-dimensional GeoJSON bounding box uses <code>[west, south, east, north]</code>. The first two numbers locate the southwest corner and the last two locate the northeast corner. Each pair puts longitude before latitude.</p>
+      <h2>Calculate a bbox from coordinates</h2>
+      <p>Consider three points near San Francisco. Pick the westernmost and easternmost longitudes, then the southernmost and northernmost latitudes. The four bounds can come from different points.</p>
+      <pre><code>{
+  "type": "MultiPoint",
+  "coordinates": [
+    [-122.50, 37.78],
+    [-122.42, 37.70],
+    [-122.35, 37.82]
+  ],
+  "bbox": [-122.50, 37.70, -122.35, 37.82]
+}</code></pre>
+      <p>The first point supplies the west edge (−122.50°), the second the south edge (37.70°), and the third both the east and north edges. A collection’s bbox must enclose the coordinates of all its children.</p>
+      <h2>Where elevation goes in a 3D bbox</h2>
+      <p>For positions with elevation, each corner has three values. Write <code>[west, south, lowest, east, north, highest]</code>. For the points <code>[10, 42, 85]</code> and <code>[11, 41, 120]</code>, the bbox is <code>[10, 41, 85, 11, 42, 120]</code>. The third and sixth values are elevations in metres.</p>
+      <h2>When the east longitude is smaller than the west</h2>
+      <p>Points at <code>[179, 10]</code> and <code>[-179, 12]</code> sit two degrees of longitude apart across the antimeridian. Their tight bbox is <code>[179, 10, -179, 12]</code>. Sorting the longitudes numerically would describe the other 358 degrees.</p>
+      <p>This example uses separate points. If a line or polygon crosses the dateline, RFC 7946 recommends cutting it there. A bbox change alone cannot split the geometry. See <a href="https://www.rfc-editor.org/rfc/rfc7946.html#section-3.1.9">RFC 7946 on antimeridian cutting</a> and <a href="https://www.rfc-editor.org/rfc/rfc7946.html#section-5.2">antimeridian bounding boxes</a>.</p>
+      <h2>Check a declared bbox against a file</h2>
+      <p>If a point falls outside a declared box, a spatial filter using that box can miss it. If every point is inside a larger box, decide whether that extra coverage is intentional before changing it. The <a href="/#workflow">GeoJSON bbox checker</a> shows the declared and calculated values side by side.</p>
+    </main>
+    <footer><span>boundsmith. · A local-first utility</span><a href="https://www.rfc-editor.org/rfc/rfc7946.html#section-5">GeoJSON bounding box specification</a></footer>
+  </div>
+</body>
+</html>

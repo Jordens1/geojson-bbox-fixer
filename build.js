@@ -14,7 +14,7 @@ function replaceRequired(source, oldValue, newValue) {
 
 await rm(output, { recursive: true, force: true });
 await mkdir(join(output, 'src'), { recursive: true });
-for (const file of ['favicon.svg', '_headers', 'robots.txt', 'sitemap.xml']) {
+for (const file of ['favicon.svg', 'favicon.png', 'bbox-example.png', '_headers', '_redirects', 'robots.txt', 'sitemap.xml']) {
   await cp(join(root, file), join(output, file));
 }
 
@@ -33,7 +33,14 @@ await writeFile(join(output, 'src/app.js'), app);
 
 const styles = await readSource('styles.css');
 await writeFile(join(output, 'styles.css'), styles);
-let html = replaceRequired(await readSource('index.html'), 'href="./styles.css"', `href="./styles.css?v=${fingerprint(styles)}"`);
-html = replaceRequired(html, 'src="./src/app.js"', `src="./src/app.js?v=${appVersion}"`);
-await writeFile(join(output, 'index.html'), html);
+const styleLink = `href="/styles.css?v=${fingerprint(styles)}"`;
+for (const page of ['index.html', 'geojson-bbox-format/index.html', '404.html']) {
+  let html = replaceRequired(await readSource(page), 'href="/styles.css"', styleLink);
+  if (page === 'index.html') {
+    html = replaceRequired(html, 'src="./src/app.js"', `src="./src/app.js?v=${appVersion}"`);
+  }
+  const destination = join(output, page);
+  await mkdir(dirname(destination), { recursive: true });
+  await writeFile(destination, html);
+}
 process.stdout.write('Static site built in dist/\n');

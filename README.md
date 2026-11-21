@@ -24,4 +24,6 @@ Open http://127.0.0.1:8788/. Run npm test for the engine regression suite. Run n
 
 ## Search indexing
 
-The canonical public URL is https://bboxfixer.com/. The build includes `robots.txt` and a one-page `sitemap.xml` at the site root. Submit `https://bboxfixer.com/sitemap.xml` in Google Search Console after verifying ownership of the domain. The `www` hostname redirects to the canonical host; Pages preview domains remain `noindex`.
+The public search entries are the [bbox checker](https://bboxfixer.com/) and the [bbox format guide](https://bboxfixer.com/geojson-bbox-format/). Both pages ship as static HTML with self-referencing canonical URLs. The sitemap lists both pages and is advertised in `robots.txt`. The top-level `404.html` gives missing paths a real 404 on Cloudflare Pages. The `www` hostname redirects to the canonical host, and Pages preview domains carry `noindex`.
+
+Run `npm run build` followed by `npm start -- --dist` to inspect the production files locally. After deployment, use the domain’s Google Search Console property to submit `https://bboxfixer.com/sitemap.xml` and inspect the two canonical URLs.

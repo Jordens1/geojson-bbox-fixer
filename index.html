@@ -4,26 +4,35 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="Find GeoJSON bbox mismatches, compare declared and calculated bounds, then fix and download your file locally. No upload or account.">
+  <title>GeoJSON Bbox Checker &amp; Fixer | Boundsmith</title>
+  <meta name="description" content="Check GeoJSON bounding boxes against their coordinates. Compare declared and calculated bounds, copy a bbox, or download a repaired file in your browser.">
   <link rel="canonical" href="https://bboxfixer.com/">
-  <title>GeoJSON Bbox Mismatch Fixer — Check & Repair Bounds Locally</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Boundsmith">
+  <meta property="og:title" content="GeoJSON Bbox Checker &amp; Fixer">
+  <meta property="og:description" content="Compare bounding boxes with their coordinates and repair GeoJSON locally in your browser.">
+  <meta property="og:url" content="https://bboxfixer.com/">
+  <meta property="og:image" content="https://bboxfixer.com/bbox-example.png">
+  <meta property="og:image:alt" content="A GeoJSON bounding box corrected from [0, 0, 1, 1] to [2, 2, 3, 3].">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Boundsmith","url":"https://bboxfixer.com/"}</script>
+  <link rel="icon" href="/favicon.png" type="image/png" sizes="96x96">
+  <link rel="stylesheet" href="/styles.css">
   <script type="module" src="./src/app.js"></script>
 </head>
 <body>
   <div class="site-shell">
     <header class="site-header">
-      <a class="brand" href="./" aria-label="Boundsmith home"><span class="brand-mark" aria-hidden="true">⌗</span><span>boundsmith<span class="brand-period">.</span></span></a>
-      <nav aria-label="Page links"><a href="#workflow">How it works</a><a href="#scope">Scope & privacy</a><a href="https://www.rfc-editor.org/rfc/rfc7946.html#section-5" target="_blank" rel="noopener noreferrer">RFC 7946 ↗</a></nav>
+      <a class="brand" href="/" aria-label="Boundsmith home"><span class="brand-mark" aria-hidden="true">⌗</span><span>boundsmith<span class="brand-period">.</span></span></a>
+      <nav aria-label="Main navigation"><a href="#workflow">Open checker</a><a href="/geojson-bbox-format/">Bbox format guide</a></nav>
     </header>
     <main>
       <section class="hero" aria-labelledby="page-title">
-        <div class="eyebrow"><span class="eyebrow-dot"></span> LOCAL GEOJSON UTILITY <span class="eyebrow-divider">/</span> TOOL 01</div>
-        <h1 id="page-title">The bounds say one thing.<br><span>The coordinates say another.</span></h1>
-        <p>Find every declared <code>bbox</code> that differs from the coordinates it describes. Review the exact change, fix the bounds, and download a clean GeoJSON file.</p>
+        <h1 id="page-title">GeoJSON bbox <span>checker &amp; fixer</span></h1>
+        <p>Check whether each bounding box in your GeoJSON matches its coordinates. Compare the declared and calculated bounds, copy a <code>bbox</code>, or download a repaired file.</p>
         <div class="hero-points"><span>⌁ &nbsp;No upload</span><span>◫ &nbsp;Nested bbox checks</span><span>↗ &nbsp;Dateline aware</span></div>
       </section>
+      <noscript><p class="notice">Enable JavaScript to inspect a file in your browser. You can also read the <a href="#example">worked example</a> below.</p></noscript>
       <section class="workspace" id="workflow" aria-label="GeoJSON checker workspace">
         <div class="panel input-panel">
           <div class="panel-heading"><div><span class="step-number">01</span><h2>Bring your GeoJSON</h2></div><span class="panel-caption">.geojson / .json · up to 5 MiB</span></div>
@@ -50,7 +59,37 @@
         </div>
       </section>
       <section class="output-panel panel" id="output-panel" hidden aria-labelledby="output-title"><div class="panel-heading"><div><span class="step-number">03</span><h2 id="output-title">Your repaired file</h2></div><span class="panel-caption" id="output-caption">Ready to export</span></div><p>Only <code>bbox</code> fields are intentionally updated. JSON formatting is rewritten, and browser number parsing can round unusually precise numeric literals. Compare this preview with your original input.</p><textarea id="output-text" readonly aria-label="Repaired GeoJSON preview"></textarea><div class="output-actions"><button class="primary-button" id="download-button" type="button"><span>Download repaired GeoJSON</span><span aria-hidden="true">↓</span></button><button class="secondary-button" id="copy-button" type="button">Copy JSON</button></div></section>
-      <section class="below-grid" id="scope"><div><span class="section-kicker">THE SHORT VERSION</span><h2>One focused fix.<br>No quiet edits.</h2><p>We inspect <code>bbox</code> members on the root, features and geometries. A box that differs from the tight calculated extent is flagged—even when its larger bounds may still be valid GeoJSON.</p></div><div class="scope-card"><h3>What this checker does</h3><ul><li>Checks 2D and 3D positions in WGS84 longitude / latitude order.</li><li>Handles already-cut geometry on both sides of the antimeridian.</li><li>Changes only existing bbox values, or adds a root bbox when you ask.</li></ul><h3>What it doesn’t do</h3><p>It does not fix coordinates, projection, polygon topology or invalid shapes, and it is not a full GeoJSON validator.</p></div></section>
+      <section class="below-grid" aria-labelledby="example">
+        <div>
+          <h2 id="example">How to fix a GeoJSON bbox mismatch</h2>
+          <ol class="instructions">
+            <li>Paste your GeoJSON, choose a file, or select <strong>Load an example</strong>.</li>
+            <li>Select <strong>Inspect bbox values</strong>. Each result identifies the feature, geometry, or collection that declares the box.</li>
+            <li>Review the differences. Copy an individual calculated bbox, or fix all mismatches together and download the repaired GeoJSON.</li>
+          </ol>
+        </div>
+        <div class="scope-card">
+          <h3>Example from the checker</h3>
+          <p>The sample polygon has corners at [2, 2], [3, 2], [3, 3], and [2, 3]. Both the feature and its collection declare a box that misses the polygon.</p>
+          <dl class="bbox-values">
+            <div><dt>Declared bbox</dt><dd><code>[0, 0, 1, 1]</code></dd></div>
+            <div><dt>Calculated bbox</dt><dd><code>[2, 2, 3, 3]</code></dd></div>
+          </dl>
+          <p>The repair updates both boxes. Read the <a href="/geojson-bbox-format/">GeoJSON bbox format guide</a> for coordinate order, elevation, and boxes that cross the dateline.</p>
+        </div>
+      </section>
+      <section class="below-grid scope-details" id="scope" aria-labelledby="scope-title">
+        <div>
+          <h2 id="scope-title">File limits and privacy</h2>
+          <p>Your browser reads and processes the file locally. The checker accepts up to 5 MiB, 200,000 positions, and 64 levels of JSON nesting. A download creates a separate file.</p>
+        </div>
+        <div class="scope-card">
+          <h3>Supported coordinates</h3>
+          <p>Use WGS84 longitude and latitude, with optional elevation. All positions in a file must use the same number of dimensions. The checker handles geometry already split at the antimeridian.</p>
+          <h3>When to keep the declared bounds</h3>
+          <p>A broader box may intentionally cover an entire survey area. Keep it if downstream users rely on that coverage. Repair changes bbox metadata only. Coordinate conversion and polygon topology need separate checks.</p>
+        </div>
+      </section>
     </main>
     <footer><span>boundsmith. · A local-first utility</span><span>Based on <a href="https://www.rfc-editor.org/rfc/rfc7946.html#section-5" target="_blank" rel="noopener noreferrer">RFC 7946 §5</a> · No account, no upload</span></footer>
   </div>
